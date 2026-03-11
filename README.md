@@ -1,2 +1,2 @@
 # AI-Resume-Tailor
-LLM Resume Generator
+LLM Resume Generator 
