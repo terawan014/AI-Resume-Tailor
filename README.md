@@ -1,2 +1,3 @@
 # AI-Resume-Tailor
-LLM Resume Generator
+
+Plese check SETUP_LOG to setup.
