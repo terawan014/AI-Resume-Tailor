@@ -1,3 +1,4 @@
 # AI-Resume-Tailor
 
-Plese check SETUP_LOG to setup.
+Please check SETUP_LOG to setup.
+Please check DEV_LOG to see the current progress.

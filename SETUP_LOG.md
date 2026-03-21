@@ -4,24 +4,7 @@ This document records the current project setup and explains how to run the proj
 
 ---
 
-## 1. Current Progress
-
-So far we have completed:
-
-* Python development environment setup
-* Virtual environment configuration
-* Groq API integration
-* First LLM test script (`app.py`) that rewrites resume bullet points
-
-Next steps will include:
-
-* Creating a structured project database (`projects.json`)
-* Parsing job descriptions
-* Generating tailored resumes using LLM prompts
-
----
-
-## 2. Environment Setup
+## Environment Setup
 
 ### Step 1 – Install Python
 
@@ -70,7 +53,7 @@ GROQ_API_KEY=api_key_here
 
 ---
 
-## 4. Run the test script
+## Run the test script
 
 Run:
 
@@ -81,7 +64,7 @@ The LLM should rewrite the resume bullet point into a more professional version.
 
 ---
 
-## 5. Notes
+## Notes
 
 We are currently using a free Groq LLM API for inference and there is a limit. Do not overuse it too much!
 

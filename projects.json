@@ -1,0 +1,16 @@
+{
+  "projects": [
+    {
+      "name": "Bilibili Favorite Duration Calculator",
+      "description": "Built a browser extension to compute total video duration across multiple pages.",
+      "skills": ["JavaScript", "DOM", "Data Processing"],
+      "tags": ["web", "automation"]
+    },
+    {
+      "name": "Autonomous Driving System",
+      "description": "Built a vision-based controller for lane following using camera input.",
+      "skills": ["Python", "Computer Vision", "ROS2"],
+      "tags": ["AI", "robotics"]
+    }
+  ]
+}
