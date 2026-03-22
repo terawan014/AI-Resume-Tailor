@@ -17,7 +17,30 @@ with open("projects.json", "r") as f:
 with open("job.txt", "r") as f:
     job = f.read()
 
+# Extract keywords from the job description
+keyword_prompt = f"""
+You are analyzing a job description.
 
+Extract the most important technical skills and keywords required for this role.
+
+Job description:
+{job}
+
+Return the result as a simple list of keywords (no explanation).
+"""
+
+keyword_response = client.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": keyword_prompt}],
+    max_tokens=200
+)
+
+keywords = keyword_response.choices[0].message.content
+
+print("Extracted Keywords:")
+print(keywords)
+
+# Create the prompt for resume generation
 prompt = f"""
 You are an expert resume writer.
 
@@ -27,6 +50,9 @@ Your task is to generate a complete tailored resume for a candidate based on:
 
 Job description:
 {job}
+
+Key skills required:
+{keywords}
 
 Candidate project database:
 {projects}
@@ -42,7 +68,7 @@ Requirements:
   5. Experience or Activities (if relevant)
 - Select 2-4 relevant projects for the target job
 - Rewrite project descriptions into professional resume bullet points
-- Prioritize keywords from the job description
+- Strongly align the resume content with the listed key skills
 - Keep the writing concise, professional, and ATS-friendly
 - Do not invent experiences that are not supported by the input
 
