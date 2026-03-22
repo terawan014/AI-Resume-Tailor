@@ -26,14 +26,33 @@ Job description:
 Candidate projects:
 {projects}
 
-Select the most relevant projects for this job and rewrite them into strong resume bullet points.
+Tasks:
+1. Select the TOP 2 most relevant projects for this job.
+2. Rewrite each project into strong resume bullet points.
+
+Output format:
+
+Project: <project name>
+• Bullet point 1
+• Bullet point 2
+
+Project: <project name>
+• Bullet point 1
+• Bullet point 2
+
+Rules:
+- Use bullet points starting with "•"
+- Each bullet should start with an action verb
+- Focus on impact and technical skills
+
 """
 
 response = client.chat.completions.create(
     model="llama-3.3-70b-versatile",
     messages=[
         {"role": "user", "content": prompt}
-    ]
+    ],
+    max_tokens=300
 )
 
 
