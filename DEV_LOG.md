@@ -58,20 +58,69 @@ projects.json + job.txt → LLM → tailored output
 
 ---
 
-###  Next Steps
+## Milestone 3 – Full Resume Generation & Job-Aware Optimization
 
-Next we will improve the intelligence and structure of the system:
+### ✅ Completed
 
-1. Improve prompt quality:
+* Expanded candidate data structure in `projects.json`
 
-   * More controlled output format
-   * Clear bullet point structure
-2. Introduce project ranking logic:
+  * Added personal info, education, skills, and activities
+  * Improved project descriptions with structured fields
+* Redesigned LLM prompt from simple rewriting → full resume generation
+* Added output file generation (`generated_resume.md`)
+* Introduced **job-aware keyword extraction step**
 
-   * Make LLM explicitly select top N projects
-3. Improve output consistency:
+  * Extracted key skills from job description using LLM
+  * Injected extracted keywords into resume generation prompt
+* Improved alignment between resume content and job requirements
+* Reduced generic outputs and increased relevance to target role
 
-   * Standardize resume bullet formatting
-4. Add CLI input instead of only file-based input
+---
+
+### Current Project State
+
+The system now supports:
+
+* Job description understanding via keyword extraction
+* Targeted resume tailoring based on role requirements
+* File-based output for generated resumes
+
+Pipeline:
+
+job.txt
+↓
+LLM → extract keywords
+↓
+projects.json + keywords
+↓
+LLM → generate tailored resume
+↓
+generated_resume.md
+
+---
+
+### Next Steps
+
+We will begin transitioning from a prototype to a user-facing product:
+
+1. Replace file-based input with interactive input
+
+   * CLI-based input (short term)
+   * Web interface (long term)
+2. Improve output reliability:
+
+   * More consistent formatting
+   * Controlled section structure
+3. Enhance decision logic:
+
+   * Explicit project ranking / scoring
+   * Better keyword-to-project matching
+4. Prepare for user experience layer:
+
+   * Input → generate → view result workflow
+
+
+
+
 
 
