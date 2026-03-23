@@ -99,25 +99,58 @@ generated_resume.md
 
 ---
 
+## Day 4 – User Input Pipeline & Product-Oriented CLI
+
+### ✅ Completed
+
+* Replaced file-based inputs (`projects.json`, `job.txt`) with **fully user-driven input**
+
+  * Implemented interactive CLI for:
+
+    * User name input
+    * Project experience input (free text)
+    * Job description input
+* Removed hardcoded data sources and improved flexibility of the system
+* Added multi-stage LLM pipeline:
+
+  1. Keyword extraction from job description
+  2. Parsing unstructured user input into structured JSON
+  3. Resume generation using structured data and extracted keywords
+* Enabled system to process raw, unstructured user input and convert it into professional resume content
+* Improved prompt design for:
+
+  * Better alignment with job requirements
+  * Cleaner and more consistent output formatting
+
+### Current Project State
+
+The system is now a **fully interactive CLI-based AI application**.
+
+Capabilities:
+
+* Accepts user-provided project experience (no predefined dataset)
+* Understands and structures raw user input using LLM
+* Extracts job-relevant keywords automatically
+* Generates a complete, job-tailored resume
+* Outputs a ready-to-use Markdown resume file
+
+---
+
 ### Next Steps
 
-We will begin transitioning from a prototype to a user-facing product:
+We will continue transforming the system into a user-facing product:
 
-1. Replace file-based input with interactive input
+1. Improve usability:
 
-   * CLI-based input (short term)
-   * Web interface (long term)
-2. Improve output reliability:
+   * Better input guidance (examples / prompts)
+   * Input validation and error handling
+2. Transition to GUI:
 
-   * More consistent formatting
-   * Controlled section structure
-3. Enhance decision logic:
+   * Build a simple web interface using Streamlit
+   * Enable real-time resume preview
 
-   * Explicit project ranking / scoring
-   * Better keyword-to-project matching
-4. Prepare for user experience layer:
 
-   * Input → generate → view result workflow
+
 
 
 
