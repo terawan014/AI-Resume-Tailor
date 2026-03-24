@@ -149,6 +149,36 @@ We will continue transforming the system into a user-facing product:
    * Build a simple web interface using Streamlit
    * Enable real-time resume preview
 
+---
+
+## Milestone 5 – Web UI Integration & Stability Issues
+
+### ✅ Completed
+
+* Built the first web-based interface using Streamlit
+* Integrated the existing multi-stage LLM pipeline into the UI
+* Refactored core logic into a reusable function (`generate_resume`)
+
+  * Enabled reuse across both CLI and UI environments
+  * Improved code modularity and separation of concerns
+* Enabled real-time display of generated resume in Markdown format
+
+---
+
+### ⚠️ Current Issues
+
+* Output quality is **inconsistent across runs**
+
+  * Weak or repetitive bullet points
+  * Poor alignment with job description
+  * Poor stucture markdown format
+
+* UI lacks validation and error handling
+
+  * No safeguards for empty or low-quality inputs
+
+---
+
 
 
 
