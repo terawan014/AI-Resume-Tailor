@@ -99,7 +99,7 @@ generated_resume.md
 
 ---
 
-## Day 4 – User Input Pipeline & Product-Oriented CLI
+## Milestone 4 – User Input Pipeline & Product-Oriented CLI
 
 ### ✅ Completed
 
