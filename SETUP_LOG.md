@@ -64,6 +64,18 @@ The LLM should rewrite the resume bullet point into a more professional version.
 
 ---
 
+## Run the ui script
+
+Run:
+pip install streamlit
+
+streamlit run app_ui.py
+
+Expected output:
+The broswer will automatically open http://localhost:8501
+
+---
+
 ## Notes
 
 We are currently using a free Groq LLM API for inference and there is a limit. Do not overuse it too much!
