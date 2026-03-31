@@ -187,11 +187,10 @@ Requirements:
 - Include these sections: Name, Summary, Technical Skills, Technical Projects, Activities (if relevant)
 - Select 2-4 most relevant projects and rank them by relevance to the job
 - Each project must have 2-3 bullet points starting with a strong action verb
-- Each bullet point MUST start on a new line with "• " (bullet + space)
 - Summary must be 2-3 sentences, tailored to the job description
 - Technical Skills must include keywords from the job description where applicable
+- Projects must ONLY come from the candidate's structured data. Never use the job description as a project source
 - Do not invent experiences not supported by the input
-- If the candidate has no activities or experience, write "• No additional activities to report" under Activities
 - Output only the final resume, no explanation
 """
     response = client.chat.completions.create(
