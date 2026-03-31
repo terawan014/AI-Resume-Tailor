@@ -14,11 +14,16 @@ def get_user_projects():
     print("\nEnter your project experiences (press Enter twice to finish):")
 
     lines = []
+    empty_count = 0
     while True:
         line = input()
         if line == "":
-            break
-        lines.append(line)
+            empty_count += 1
+            if empty_count >= 2:
+              break
+            else:
+                empty_count = 0
+                lines.append(line)
 
     return "\n".join(lines)
 
@@ -27,11 +32,16 @@ def get_job_description():
     print("\nPaste the job description (press Enter twice to finish):")
 
     lines = []
+    empty_count = 0
     while True:
         line = input()
         if line == "":
-            break
-        lines.append(line)
+            empty_count += 1
+            if empty_count >= 2:
+                break
+        else:
+            empty_count = 0
+            lines.append(line)
 
     return "\n".join(lines)
 
@@ -97,90 +107,126 @@ def generate_resume(name, projects_text, job):
     cleaned = raw_data.replace("```json", "").replace("```", "").strip()
 
     try:
-        structured_json = json.loads(cleaned)
-    except:
-        print("Failed to parse JSON, using raw text")
-        structured_json = cleaned
+        structured_data = json.loads(cleaned)
+        structured_json = json.dumps(structured_data, indent=2)
+        print("\nParsed Projects:")
+        print(structured_json)
+    except json.JSONDecodeError:
+        print("\nWarning: JSON parsing failed, attempting recovery...")
+        fix_prompt = f"""
+The following text should be valid JSON but has formatting errors.
+Fix it and return ONLY valid JSON, nothing else:
+ 
+{cleaned}
+"""
+        fix_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": fix_prompt}],
+            max_tokens=500
+        )
+        fixed = fix_response.choices[0].message.content
+        fixed_cleaned = fixed.replace("```json", "").replace("```", "").strip()
+ 
+        try:
+            structured_data = json.loads(fixed_cleaned)
+            structured_json = json.dumps(structured_data, indent=2)
+            print("Recovery successful.")
+            print(structured_json)
+        except json.JSONDecodeError:
+            # Final fallback: pass raw text but warn
+            print("Warning: Could not parse JSON after recovery. Using raw text.")
+            structured_json = projects_text
 
-    print(json.dumps(structured_json, indent=2))
-
+    
     # Create the prompt for resume generation
     prompt = f"""
-    You are an expert resume writer.
-
-    Your task is to generate a complete tailored resume for a candidate based on:
-    1. the candidate's project database
-    2. the target job description
-
-    Understand and structure the candidate's experiences to best match the requirements of the job description.
-
-    Job description:
-    {job}
-
-    Key skills required:
-    {keywords}
-
-    Candidate structured data:
-    {structured_json}
-
-    Candidate name: {name}
-
-    Requirements:
-    - Generate a complete resume in Markdown format
-    - Include these sections:
-    1. Name
-    2. Summary
-    3. Technical Skills
-    4. Technical Projects
-    5. Experience or Activities (if relevant)
-    - Select 2-4 projects for the target job ranking based on relevance to the job description
-    - Rewrite project descriptions into professional resume bullet points
-    - Strongly align the resume content with the listed key skills
-    - Keep the writing concise, professional, and ATS-friendly
-    - Do not invent experiences that are not supported by the input
-    - Always strictly follow the section structure. Do not omit sections.
-
-
-    Project format:
-
-    Project: <project name>
-    • Bullet point 1
-    • Bullet point 2
-
-    Project: <project name>
-    • Bullet point 1
-    • Bullet point 2
-
-    Rules:
-    - Use bullet points starting with "•"
-    - Each bullet should start with an action verb
-    - Focus on impact and technical skills
-    - Output only the final resume
-    """
-
+You are an expert resume writer. Generate a complete, professional, ATS-friendly resume in Markdown format.
+ 
+Below is an example of the exact output format you must follow:
+ 
+---
+# Jane Smith
+ 
+## Summary
+Results-driven software engineer with 2 years of experience building full-stack web applications. Proficient in Python, React, and cloud deployment. Passionate about clean code and scalable systems.
+ 
+## Technical Skills
+Python, React, Node.js, PostgreSQL, Docker, AWS, Git
+ 
+## Technical Projects
+ 
+**Project: E-Commerce Platform**
+• Developed a full-stack e-commerce application using React and Node.js, reducing page load time by 30%
+• Integrated Stripe payment API to handle secure transactions for 500+ monthly users
+• Deployed on AWS EC2 with Docker containerization, achieving 99.9% uptime
+ 
+**Project: Data Pipeline Tool**
+• Built an automated ETL pipeline in Python to process 10,000+ records daily from REST APIs
+• Designed PostgreSQL schema and optimized queries, improving data retrieval speed by 40%
+• Implemented error handling and logging to ensure pipeline reliability
+ 
+## Activities
+• Teaching Assistant, Introduction to Programming – supported 30 students with weekly lab sessions
+---
+ 
+Now generate a resume for the following candidate:
+ 
+Job description:
+{job}
+ 
+Key skills required:
+{keywords}
+ 
+Candidate projects (structured):
+{structured_json}
+ 
+Candidate name: {name}
+ 
+Requirements:
+- Follow the exact format shown in the example above
+- Include these sections: Name, Summary, Technical Skills, Technical Projects, Activities (if relevant)
+- Select 2-4 most relevant projects and rank them by relevance to the job
+- Each project must have 2-3 bullet points starting with a strong action verb
+- Each bullet point MUST start on a new line with "• " (bullet + space)
+- Summary must be 2-3 sentences, tailored to the job description
+- Technical Skills must include keywords from the job description where applicable
+- Do not invent experiences not supported by the input
+- If the candidate has no activities or experience, write "• No additional activities to report" under Activities
+- Output only the final resume, no explanation
+"""
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=1200
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=2000
     )
-
+ 
     resume_text = response.choices[0].message.content
-
+    resume_text = resume_text.replace("• ", "\n• ").strip()
     return resume_text
-
-
+ 
+ 
 if __name__ == "__main__":
     print("=== AI Resume Tailor ===")
-    name = input("\nEnter your name: ")
-
+    name = input("\nEnter your name: ").strip()
+ 
+    if not name:
+        print("Error: Name cannot be empty.")
+        exit(1)
+ 
     projects_text = get_user_projects()
+    if not projects_text.strip():
+        print("Error: Project experience cannot be empty.")
+        exit(1)
+ 
     job = get_job_description()
+    if not job.strip():
+        print("Error: Job description cannot be empty.")
+        exit(1)
+ 
     resume_text = generate_resume(name, projects_text, job)
-
-    # Save the generated resume to a Markdown file
+ 
     with open("generated_resume.md", "w", encoding="utf-8") as f:
         f.write(resume_text)
-    print("Resume generated and saved to generated_resume.md")
+ 
+    print("\nResume generated and saved to generated_resume.md")
 
