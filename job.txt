@@ -1,7 +1,0 @@
-AI Intern
-Requirements:
-- Python
-- Machine Learning
-- Data analysis
-- LLM
-- experimentation
