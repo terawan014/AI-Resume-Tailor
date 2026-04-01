@@ -3,6 +3,7 @@
 __pycache__/
 *.pyc
 generated_resume.md
+resume_history.db
 DEV_LOG.md
 SETUP_LOG.md
 job.txt

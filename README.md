@@ -113,11 +113,16 @@ Your project experience and job description are sent to the configured LLM provi
 
 ## Development Status
 
-Planned improvements could include:
+Current development roadmap:
 
-- Make a fully online website
-- Export to PDF or DOCX
-- Better resume section customization
+- [x] Add persistent resume history with SQLite
+- [x] Show saved resume history inside the app
+- [ ] Deploy the app as a public website
+- [ ] Refactor the project into a clearer frontend/backend structure
+- [ ] Add user authentication so each user can manage their own resumes
+- [ ] Support exporting resumes to PDF and DOCX
+- [ ] Add editable resume sections after AI generation
+- [ ] Improve prompt quality and output consistency
 
 ## Troubleshooting
 
@@ -144,4 +149,3 @@ Check:
 - Your internet connection is working
 - The Groq API is available
 - Your input is not empty
-

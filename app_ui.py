@@ -1,12 +1,15 @@
 import streamlit as st
 
 from app import generate_resume
+from database import get_recent_resumes, init_db, save_resume
 
 
 st.set_page_config(
     page_title="AI Resume Tailor",
     layout="wide",
 )
+
+init_db()
 
 st.title("AI Resume Tailor")
 st.caption("Paste your experience and a target job description to generate a tailored resume.")
@@ -52,6 +55,7 @@ if generate_clicked:
         try:
             with st.spinner("Generating your resume... this may take a few seconds."):
                 result = generate_resume(name, projects, job)
+                save_resume(name, projects, job, result)
 
             output_box.markdown(result)
             st.success("Resume generated successfully.")
@@ -65,3 +69,27 @@ if generate_clicked:
         except Exception as e:
             st.error(f"Something went wrong: {e}")
             st.info("Make sure GROQ_API_KEY is configured in .env or in your deployment secrets.")
+
+st.divider()
+st.subheader("Resume History")
+
+history = get_recent_resumes()
+
+if not history:
+    st.info("No saved resumes yet. Generate one to start building history.")
+else:
+    for item in history:
+        job_preview = item["job_description"].strip().replace("\n", " ")
+        if len(job_preview) > 90:
+            job_preview = job_preview[:87] + "..."
+
+        with st.expander(f'{item["name"]} | {item["created_at"]} | {job_preview}'):
+            st.markdown(item["resume_markdown"])
+            st.download_button(
+                label=f'Download Resume #{item["id"]}',
+                data=item["resume_markdown"],
+                file_name=f'resume_{item["id"]}.md',
+                mime="text/markdown",
+                key=f'download-history-{item["id"]}',
+                use_container_width=True,
+            )
