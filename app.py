@@ -8,7 +8,31 @@ import json
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+def get_api_key():
+    api_key = os.getenv("GROQ_API_KEY")
+    if api_key:
+        return api_key
+
+    try:
+        import streamlit as st
+
+        secret_value = st.secrets.get("GROQ_API_KEY")
+        if secret_value:
+            return secret_value
+    except Exception:
+        pass
+
+    return None
+
+
+def get_client():
+    api_key = get_api_key()
+    if not api_key:
+        raise ValueError(
+            "Missing GROQ_API_KEY. Add it to your local .env file or your deployed app secrets."
+        )
+    return Groq(api_key=api_key)
 
 def get_user_projects():
     print("\nEnter your project experiences (press Enter twice to finish):")
@@ -46,6 +70,7 @@ def get_job_description():
     return "\n".join(lines)
 
 def generate_resume(name, projects_text, job):
+    client = get_client()
 # Extract keywords from the job description
     keyword_prompt = f"""
     You are analyzing a job description.

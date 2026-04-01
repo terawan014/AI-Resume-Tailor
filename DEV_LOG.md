@@ -136,21 +136,6 @@ Capabilities:
 
 ---
 
-### Next Steps
-
-We will continue transforming the system into a user-facing product:
-
-1. Improve usability:
-
-   * Better input guidance (examples / prompts)
-   * Input validation and error handling
-2. Transition to GUI:
-
-   * Build a simple web interface using Streamlit
-   * Enable real-time resume preview
-
----
-
 ## Milestone 5 – Web UI Integration & Stability Issues
 
 ### ✅ Completed
