@@ -43,7 +43,7 @@ def get_recent_resumes(limit=10):
     with get_connection() as conn:
         rows = conn.execute(
             """
-            SELECT id, name, job_description, resume_markdown, created_at
+            SELECT id, name, project_input, job_description, resume_markdown, created_at
             FROM resumes
             ORDER BY datetime(created_at) DESC, id DESC
             LIMIT ?

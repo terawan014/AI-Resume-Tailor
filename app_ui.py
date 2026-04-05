@@ -11,6 +11,25 @@ st.set_page_config(
 
 init_db()
 
+if "name_input" not in st.session_state:
+    st.session_state.name_input = ""
+if "projects_input" not in st.session_state:
+    st.session_state.projects_input = ""
+if "job_input" not in st.session_state:
+    st.session_state.job_input = ""
+if "generated_resume" not in st.session_state:
+    st.session_state.generated_resume = ""
+if "pending_loaded_resume" not in st.session_state:
+    st.session_state.pending_loaded_resume = None
+
+if st.session_state.pending_loaded_resume:
+    pending_resume = st.session_state.pending_loaded_resume
+    st.session_state.name_input = pending_resume["name"]
+    st.session_state.projects_input = pending_resume["project_input"]
+    st.session_state.job_input = pending_resume["job_description"]
+    st.session_state.generated_resume = pending_resume["resume_markdown"]
+    st.session_state.pending_loaded_resume = None
+
 st.title("AI Resume Tailor")
 st.caption("Paste your experience and a target job description to generate a tailored resume.")
 
@@ -21,9 +40,10 @@ with st.sidebar:
     st.write("3. Paste the job description.")
     st.write("4. Click Generate Resume.")
 
-name = st.text_input("Your name", placeholder="Jane Smith")
+name = st.text_input("Your name", key="name_input", placeholder="Jane Smith")
 projects = st.text_area(
     "Project experience",
+    key="projects_input",
     height=280,
     placeholder=(
         "Example:\n"
@@ -34,6 +54,7 @@ projects = st.text_area(
 )
 job = st.text_area(
     "Job description",
+    key="job_input",
     height=280,
     placeholder="Paste the full job description here...",
 )
@@ -42,7 +63,11 @@ generate_clicked = st.button("Generate Resume", type="primary", use_container_wi
 
 st.subheader("Generated Resume")
 output_box = st.empty()
-output_box.info("Your tailored resume will appear here.")
+
+if st.session_state.generated_resume:
+    output_box.markdown(st.session_state.generated_resume)
+else:
+    output_box.info("Your tailored resume will appear here.")
 
 if generate_clicked:
     if not name.strip():
@@ -57,6 +82,7 @@ if generate_clicked:
                 result = generate_resume(name, projects, job)
                 save_resume(name, projects, job, result)
 
+            st.session_state.generated_resume = result
             output_box.markdown(result)
             st.success("Resume generated successfully.")
             st.download_button(
@@ -85,7 +111,21 @@ else:
 
         with st.expander(f'{item["name"]} | {item["created_at"]} | {job_preview}'):
             st.markdown(item["resume_markdown"])
-            download_col, delete_col = st.columns(2)
+            load_col, download_col, delete_col = st.columns(3)
+
+            with load_col:
+                if st.button(
+                    f'Load Resume #{item["id"]}',
+                    key=f'load-history-{item["id"]}',
+                    use_container_width=True,
+                ):
+                    st.session_state.pending_loaded_resume = {
+                        "name": item["name"],
+                        "project_input": item["project_input"],
+                        "job_description": item["job_description"],
+                        "resume_markdown": item["resume_markdown"],
+                    }
+                    st.rerun()
 
             with download_col:
                 st.download_button(
