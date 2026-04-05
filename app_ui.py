@@ -104,18 +104,20 @@ history = get_recent_resumes()
 if not history:
     st.info("No saved resumes yet. Generate one to start building history.")
 else:
-    for item in history:
+    for display_index, item in enumerate(history, start=1):
         job_preview = item["job_description"].strip().replace("\n", " ")
         if len(job_preview) > 90:
             job_preview = job_preview[:87] + "..."
 
-        with st.expander(f'{item["name"]} | {item["created_at"]} | {job_preview}'):
+        with st.expander(
+            f'Resume #{display_index} | {item["name"]} | {item["created_at"]} | {job_preview}'
+        ):
             st.markdown(item["resume_markdown"])
             load_col, download_col, delete_col = st.columns(3)
 
             with load_col:
                 if st.button(
-                    f'Load Resume #{item["id"]}',
+                    f"Load Resume #{display_index}",
                     key=f'load-history-{item["id"]}',
                     use_container_width=True,
                 ):
@@ -129,9 +131,9 @@ else:
 
             with download_col:
                 st.download_button(
-                    label=f'Download Resume #{item["id"]}',
+                    label=f"Download Resume #{display_index}",
                     data=item["resume_markdown"],
-                    file_name=f'resume_{item["id"]}.md',
+                    file_name=f"resume_{display_index}.md",
                     mime="text/markdown",
                     key=f'download-history-{item["id"]}',
                     use_container_width=True,
@@ -139,10 +141,10 @@ else:
 
             with delete_col:
                 if st.button(
-                    f'Delete Resume #{item["id"]}',
+                    f"Delete Resume #{display_index}",
                     key=f'delete-history-{item["id"]}',
                     use_container_width=True,
                 ):
                     delete_resume(item["id"])
-                    st.success(f'Resume #{item["id"]} deleted.')
+                    st.success(f"Resume #{display_index} deleted.")
                     st.rerun()
