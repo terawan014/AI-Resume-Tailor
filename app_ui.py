@@ -11,11 +11,8 @@ from services.resume_service import generate_resume
 from utils.resume_editor import build_resume_markdown, parse_resume_markdown
 
 
-def initialize_history_editor(item):
+def reset_history_editor_state(item):
     base_key = f'history-editor-{item["id"]}'
-    if st.session_state.get(f"{base_key}-initialized"):
-        return
-
     parsed = parse_resume_markdown(item["resume_markdown"])
     st.session_state[f"{base_key}-name"] = parsed["name"] or item["name"]
     st.session_state[f"{base_key}-summary"] = parsed["summary"]
@@ -28,6 +25,17 @@ def initialize_history_editor(item):
         st.session_state[f"{base_key}-project-bullets-{index}"] = "\n".join(project["bullets"])
 
     st.session_state[f"{base_key}-initialized"] = True
+    st.session_state[f"{base_key}-source-markdown"] = item["resume_markdown"]
+
+
+def initialize_history_editor(item):
+    base_key = f'history-editor-{item["id"]}'
+    if not st.session_state.get(f"{base_key}-initialized"):
+        reset_history_editor_state(item)
+        return
+
+    if st.session_state.get(f"{base_key}-source-markdown") != item["resume_markdown"]:
+        reset_history_editor_state(item)
 
 
 def build_history_resume_from_state(item):
@@ -52,6 +60,12 @@ def build_history_resume_from_state(item):
         projects,
         st.session_state.get(f"{base_key}-activities", ""),
     )
+
+
+def clear_all_history_editor_state():
+    keys_to_remove = [key for key in st.session_state.keys() if key.startswith("history-editor-")]
+    for key in keys_to_remove:
+        del st.session_state[key]
 
 
 st.set_page_config(
@@ -154,7 +168,6 @@ else:
         ):
             initialize_history_editor(item)
             base_key = f'history-editor-{item["id"]}'
-            edited_resume_markdown = build_history_resume_from_state(item)
             edit_col, preview_col = st.columns([1.1, 0.9])
 
             with edit_col:
@@ -220,6 +233,8 @@ else:
                     help="Write one activity per line. Leave blank if not needed.",
                 )
 
+            edited_resume_markdown = build_history_resume_from_state(item)
+
             with preview_col:
                 st.markdown("Preview")
                 st.markdown(edited_resume_markdown)
@@ -233,6 +248,7 @@ else:
                     use_container_width=True,
                 ):
                     update_resume_markdown(item["id"], edited_resume_markdown)
+                    st.session_state[f"{base_key}-source-markdown"] = edited_resume_markdown
                     if st.session_state.generated_resume == item["resume_markdown"]:
                         st.session_state.generated_resume = edited_resume_markdown
                     st.success(f"Resume #{display_index} updated.")
@@ -254,6 +270,7 @@ else:
                     key=f'delete-history-{item["id"]}',
                     use_container_width=True,
                 ):
+                    clear_all_history_editor_state()
                     delete_resume(item["id"])
                     st.success(f"Resume #{display_index} deleted.")
                     st.rerun()
