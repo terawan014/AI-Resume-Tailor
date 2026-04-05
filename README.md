@@ -129,7 +129,7 @@ Current development roadmap:
 - [x] Refactor the project into a clearer frontend/backend structure
 - [ ] Add user authentication so each user can manage their own resumes
 - [ ] Support exporting resumes to PDF and DOCX
-- [ ] Add editable resume sections after AI generation
+- [x] Add editable resume sections after AI generation
 - [ ] Improve prompt quality and output consistency
 
 ## Troubleshooting

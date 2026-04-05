@@ -1,8 +1,17 @@
+import re
+
+
 def normalize_bullet_text(line):
     stripped = line.strip()
-    for prefix in ("- ", "* ", "鈥?", "閳?"):
-        if stripped.startswith(prefix):
-            return stripped[len(prefix):].strip()
+    stripped = stripped.replace("鈥?", "- ").replace("閳?", "- ").replace("闁?", "- ")
+
+    # Remove one or more leading bullet markers so we always store plain text.
+    while True:
+        cleaned = re.sub(r"^(?:[-*•]\s+)+", "", stripped).strip()
+        if cleaned == stripped:
+            break
+        stripped = cleaned
+
     return stripped
 
 
@@ -76,7 +85,7 @@ def build_resume_markdown(name, summary, skills, projects, activities):
 
     for project in projects:
         title = project["title"].strip()
-        bullets = [bullet.strip() for bullet in project["bullets"] if bullet.strip()]
+        bullets = [normalize_bullet_text(bullet) for bullet in project["bullets"] if bullet.strip()]
         if not title and not bullets:
             continue
 
@@ -85,7 +94,7 @@ def build_resume_markdown(name, summary, skills, projects, activities):
             lines.append(f"- {bullet}")
         lines.append("")
 
-    activity_lines = [line.strip() for line in activities.splitlines() if line.strip()]
+    activity_lines = [normalize_bullet_text(line) for line in activities.splitlines() if line.strip()]
     if activity_lines:
         lines.extend(["## Activities"])
         for activity in activity_lines:
