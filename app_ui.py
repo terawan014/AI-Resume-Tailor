@@ -1,7 +1,7 @@
 import streamlit as st
 
 from app import generate_resume
-from database import get_recent_resumes, init_db, save_resume
+from database import delete_resume, get_recent_resumes, init_db, save_resume
 
 
 st.set_page_config(
@@ -85,11 +85,24 @@ else:
 
         with st.expander(f'{item["name"]} | {item["created_at"]} | {job_preview}'):
             st.markdown(item["resume_markdown"])
-            st.download_button(
-                label=f'Download Resume #{item["id"]}',
-                data=item["resume_markdown"],
-                file_name=f'resume_{item["id"]}.md',
-                mime="text/markdown",
-                key=f'download-history-{item["id"]}',
-                use_container_width=True,
-            )
+            download_col, delete_col = st.columns(2)
+
+            with download_col:
+                st.download_button(
+                    label=f'Download Resume #{item["id"]}',
+                    data=item["resume_markdown"],
+                    file_name=f'resume_{item["id"]}.md',
+                    mime="text/markdown",
+                    key=f'download-history-{item["id"]}',
+                    use_container_width=True,
+                )
+
+            with delete_col:
+                if st.button(
+                    f'Delete Resume #{item["id"]}',
+                    key=f'delete-history-{item["id"]}',
+                    use_container_width=True,
+                ):
+                    delete_resume(item["id"])
+                    st.success(f'Resume #{item["id"]} deleted.')
+                    st.rerun()

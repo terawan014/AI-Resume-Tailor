@@ -51,3 +51,14 @@ def get_recent_resumes(limit=10):
             (limit,),
         ).fetchall()
     return [dict(row) for row in rows]
+
+
+def delete_resume(resume_id):
+    with get_connection() as conn:
+        conn.execute(
+            """
+            DELETE FROM resumes
+            WHERE id = ?
+            """,
+            (resume_id,),
+        )
