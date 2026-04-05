@@ -23,6 +23,14 @@ The final output is shown directly in the web app and can be downloaded as a Mar
 - `llama-3.3-70b-versatile`
 - `python-dotenv`
 
+## Project Structure
+
+- `app_ui.py`: Streamlit frontend
+- `app.py`: CLI entry point
+- `services/`: backend service layer for LLM and resume generation
+- `database.py`: persistence layer for resume history
+- `utils/`: shared helpers for resume parsing and formatting
+
 
 ## Quick Start
 
@@ -118,7 +126,7 @@ Current development roadmap:
 - [x] Add persistent resume history with SQLite
 - [x] Show saved resume history inside the app
 - [ ] Deploy the app as a public website
-- [ ] Refactor the project into a clearer frontend/backend structure
+- [x] Refactor the project into a clearer frontend/backend structure
 - [ ] Add user authentication so each user can manage their own resumes
 - [ ] Support exporting resumes to PDF and DOCX
 - [ ] Add editable resume sections after AI generation
