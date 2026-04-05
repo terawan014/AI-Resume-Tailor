@@ -62,3 +62,15 @@ def delete_resume(resume_id):
             """,
             (resume_id,),
         )
+
+
+def update_resume_markdown(resume_id, resume_markdown):
+    with get_connection() as conn:
+        conn.execute(
+            """
+            UPDATE resumes
+            SET resume_markdown = ?
+            WHERE id = ?
+            """,
+            (resume_markdown, resume_id),
+        )
