@@ -85,13 +85,9 @@ Then open the local URL shown in the terminal, usually:
 http://localhost:8501
 ```
 
-### Option 2: Double-click on Windows
+### Option 2: Through the public website (Using our free limited APIs)
 
-You can also run:
-
-- [Open_AI_Resume_Tailor.bat](/c:/Users/huashuo/Desktop/AI-Resume-Tailor/Open_AI_Resume_Tailor.bat)
-
-This starts the Streamlit app locally in your browser.
+https://ai-resume-tailor-mpxvnudsjjyp6awwfhk7cs.streamlit.app/
 
 ## Deploy as a Public Website
 
@@ -155,7 +151,7 @@ Current development roadmap:
 
 - [x] Add persistent resume history with SQLite
 - [x] Show saved resume history inside the app
-- [ ] Deploy the app as a public website
+- [x] Deploy the app as a public website
 - [x] Refactor the project into a clearer frontend/backend structure
 - [ ] Add user authentication so each user can manage their own resumes
 - [ ] Support exporting resumes to PDF and DOCX
