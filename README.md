@@ -93,6 +93,36 @@ You can also run:
 
 This starts the Streamlit app locally in your browser.
 
+## Deploy as a Public Website
+
+The easiest deployment path for this project is Streamlit Community Cloud.
+
+### Deploy with Streamlit Community Cloud
+
+1. Push your latest code to GitHub
+2. Go to `https://share.streamlit.io/`
+3. Click `New app`
+4. Select this repository
+5. Set the main file path to `app_ui.py`
+6. Add your app secret:
+
+```toml
+GROQ_API_KEY = "your_api_key_here"
+```
+
+7. Click `Deploy`
+
+After deployment, Streamlit will generate a public URL that anyone can open in the browser.
+
+## Deployment Notes
+
+- The app is already structured for Streamlit Cloud deployment
+- `app_ui.py` is the web entry point
+- `requirements.txt` contains the deployment dependencies
+- `services/llm_client.py` supports both local `.env` and Streamlit secrets
+- Local files like `.env`, `resume_history.db`, `DEV_LOG.md`, `SETUP_LOG.md`, `job.txt`, and `projects.json` are already ignored by Git
+
+
 ## Input Tips
 
 You will get better results if your project input includes:
@@ -130,7 +160,6 @@ Current development roadmap:
 - [ ] Add user authentication so each user can manage their own resumes
 - [ ] Support exporting resumes to PDF and DOCX
 - [x] Add editable resume sections after AI generation
-- [ ] Improve prompt quality and output consistency
 
 ## Troubleshooting
 
