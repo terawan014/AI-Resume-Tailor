@@ -30,6 +30,7 @@ The final output is shown directly in the web app and can be downloaded as a Mar
 - `services/`: backend service layer for LLM and resume generation
 - `database.py`: persistence layer for resume history
 - `utils/`: shared helpers for resume parsing and formatting
+- `supabase/schema.sql`: SQL setup for online resume history storage
 
 
 ## Quick Start
@@ -104,6 +105,8 @@ The easiest deployment path for this project is Streamlit Community Cloud.
 
 ```toml
 GROQ_API_KEY = "your_api_key_here"
+SUPABASE_URL = "https://your-project-id.supabase.co"
+SUPABASE_KEY = "your-anon-key"
 ```
 
 7. Click `Deploy`
@@ -116,7 +119,39 @@ After deployment, Streamlit will generate a public URL that anyone can open in t
 - `app_ui.py` is the web entry point
 - `requirements.txt` contains the deployment dependencies
 - `services/llm_client.py` supports both local `.env` and Streamlit secrets
+- `database.py` supports Supabase for online resume history storage
 - Local files like `.env`, `resume_history.db`, `DEV_LOG.md`, `SETUP_LOG.md`, `job.txt`, and `projects.json` are already ignored by Git
+
+## Supabase Setup for Online Resume History
+
+If you want resume history to persist online, create a Supabase project and run the SQL in:
+
+- `supabase/schema.sql`
+
+Then add these secrets to Streamlit Cloud:
+
+```toml
+GROQ_API_KEY = "your_api_key_here"
+SUPABASE_URL = "https://your-project-id.supabase.co"
+SUPABASE_KEY = "your-anon-key"
+```
+
+The app will:
+
+- use Supabase when `SUPABASE_URL` and `SUPABASE_KEY` are present
+- fall back to local SQLite when they are missing
+
+## Important Limitation for Current Supabase Setup
+
+The current Supabase policies are intentionally open so the public demo works before authentication is added.
+
+That means:
+
+- anyone with access to the public app can create, edit, and delete resume history
+- this is acceptable for a demo phase
+- it is not the final production security model
+
+Once we add authentication, we should replace the public policies with per-user access control.
 
 
 ## Input Tips
