@@ -122,9 +122,9 @@ After deployment, Streamlit will generate a public URL that anyone can open in t
 - `database.py` supports Supabase for online resume history storage
 - Local files like `.env`, `resume_history.db`, `DEV_LOG.md`, `SETUP_LOG.md`, `job.txt`, and `projects.json` are already ignored by Git
 
-## Supabase Setup for Online Resume History
+## Supabase Auth and Online History Setup
 
-If you want resume history to persist online, create a Supabase project and run the SQL in:
+If you want per-user resume history online, create a Supabase project and run the SQL in:
 
 - `supabase/schema.sql`
 
@@ -140,18 +140,18 @@ The app will:
 
 - use Supabase when `SUPABASE_URL` and `SUPABASE_KEY` are present
 - fall back to local SQLite when they are missing
+- require sign in to save and manage online resume history
+- isolate each user's history by `user_id`
 
-## Important Limitation for Current Supabase Setup
+## Important Limitation for Current Auth Setup
 
-The current Supabase policies are intentionally open so the public demo works before authentication is added.
+This app now depends on Supabase Auth for per-user history in the deployed version.
 
 That means:
 
-- anyone with access to the public app can create, edit, and delete resume history
-- this is acceptable for a demo phase
-- it is not the final production security model
-
-Once we add authentication, we should replace the public policies with per-user access control.
+- users need to sign up or sign in to save resumes online
+- local SQLite still works without login in local development
+- if you previously created a public `resumes` table without `user_id`, you should re-run `supabase/schema.sql` in a fresh table or update the schema manually
 
 
 ## Input Tips
@@ -188,7 +188,7 @@ Current development roadmap:
 - [x] Show saved resume history inside the app
 - [x] Deploy the app as a public website
 - [x] Refactor the project into a clearer frontend/backend structure
-- [ ] Add user authentication so each user can manage their own resumes
+- [x] Add user authentication so each user can manage their own resumes
 - [ ] Support exporting resumes to PDF and DOCX
 - [x] Add editable resume sections after AI generation
 

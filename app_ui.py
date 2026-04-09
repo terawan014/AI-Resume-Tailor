@@ -7,7 +7,9 @@ from database import (
     save_resume,
     update_resume_markdown,
 )
+from services.auth_service import restore_user, sign_in, sign_out, sign_up
 from services.resume_service import generate_resume
+from services.supabase_client import is_supabase_enabled
 from utils.resume_editor import build_resume_markdown, parse_resume_markdown
 
 
@@ -83,11 +85,78 @@ if "job_input" not in st.session_state:
     st.session_state.job_input = ""
 if "generated_resume" not in st.session_state:
     st.session_state.generated_resume = ""
+if "auth" not in st.session_state:
+    st.session_state.auth = {
+        "access_token": None,
+        "refresh_token": None,
+        "user": None,
+    }
 
 st.title("AI Resume Tailor")
 st.caption("Paste your experience and a target job description to generate a tailored resume.")
 
 with st.sidebar:
+    if is_supabase_enabled():
+        st.header("Account")
+        auth_state = st.session_state.auth
+
+        if auth_state["access_token"] and auth_state["refresh_token"] and auth_state["user"] is None:
+            try:
+                auth_state["user"] = restore_user(
+                    auth_state["access_token"],
+                    auth_state["refresh_token"],
+                )
+            except Exception:
+                st.session_state.auth = {"access_token": None, "refresh_token": None, "user": None}
+
+        if st.session_state.auth["user"]:
+            user_email = getattr(st.session_state.auth["user"], "email", "Signed in user")
+            st.success(f"Signed in as {user_email}")
+            if st.button("Sign Out", use_container_width=True):
+                sign_out(
+                    st.session_state.auth["access_token"],
+                    st.session_state.auth["refresh_token"],
+                )
+                st.session_state.auth = {"access_token": None, "refresh_token": None, "user": None}
+                clear_all_history_editor_state()
+                st.rerun()
+        else:
+            auth_mode = st.radio("Auth mode", ["Sign In", "Sign Up"], horizontal=True)
+            with st.form("auth_form"):
+                email = st.text_input("Email")
+                password = st.text_input("Password", type="password")
+                submitted = st.form_submit_button(auth_mode, use_container_width=True)
+
+            if submitted:
+                try:
+                    if auth_mode == "Sign In":
+                        auth_result = sign_in(email, password)
+                        session = auth_result["session"]
+                        user = auth_result["user"]
+                        st.session_state.auth = {
+                            "access_token": session.access_token,
+                            "refresh_token": session.refresh_token,
+                            "user": user,
+                        }
+                        clear_all_history_editor_state()
+                        st.rerun()
+                    else:
+                        auth_result = sign_up(email, password)
+                        session = auth_result["session"]
+                        user = auth_result["user"]
+                        if session and user:
+                            st.session_state.auth = {
+                                "access_token": session.access_token,
+                                "refresh_token": session.refresh_token,
+                                "user": user,
+                            }
+                            clear_all_history_editor_state()
+                            st.rerun()
+                        else:
+                            st.success("Account created. Check your email to confirm your sign-up before signing in.")
+                except Exception as error:
+                    st.error(f"Authentication failed: {error}")
+
     st.header("How to use")
     st.write("1. Enter your name.")
     st.write("2. Paste your project experience.")
@@ -134,7 +203,14 @@ if generate_clicked:
         try:
             with st.spinner("Generating your resume... this may take a few seconds."):
                 result = generate_resume(name, projects, job)
-                save_resume(name, projects, job, result)
+                current_user = st.session_state.auth["user"]
+                if is_supabase_enabled():
+                    if current_user:
+                        save_resume(name, projects, job, result, user_id=current_user.id)
+                    else:
+                        st.info("Resume generated. Sign in to save it to your online history.")
+                else:
+                    save_resume(name, projects, job, result)
 
             st.session_state.generated_resume = result
             output_box.markdown(result)
@@ -153,10 +229,17 @@ if generate_clicked:
 st.divider()
 st.subheader("Resume History")
 
-history = get_recent_resumes()
+if is_supabase_enabled() and not st.session_state.auth["user"]:
+    st.info("Sign in to view and manage your personal resume history.")
+    history = []
+    current_user_id = None
+else:
+    current_user_id = st.session_state.auth["user"].id if is_supabase_enabled() else None
+    history = get_recent_resumes(user_id=current_user_id)
 
 if not history:
-    st.info("No saved resumes yet. Generate one to start building history.")
+    if not (is_supabase_enabled() and not st.session_state.auth["user"]):
+        st.info("No saved resumes yet. Generate one to start building history.")
 else:
     for display_index, item in enumerate(history, start=1):
         job_preview = item["job_description"].strip().replace("\n", " ")
@@ -247,7 +330,11 @@ else:
                     key=f'save-history-{item["id"]}',
                     use_container_width=True,
                 ):
-                    update_resume_markdown(item["id"], edited_resume_markdown)
+                    update_resume_markdown(
+                        item["id"],
+                        edited_resume_markdown,
+                        user_id=current_user_id,
+                    )
                     st.session_state[f"{base_key}-source-markdown"] = edited_resume_markdown
                     if st.session_state.generated_resume == item["resume_markdown"]:
                         st.session_state.generated_resume = edited_resume_markdown
@@ -271,6 +358,6 @@ else:
                     use_container_width=True,
                 ):
                     clear_all_history_editor_state()
-                    delete_resume(item["id"])
+                    delete_resume(item["id"], user_id=current_user_id)
                     st.success(f"Resume #{display_index} deleted.")
                     st.rerun()

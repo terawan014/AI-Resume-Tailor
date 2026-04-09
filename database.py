@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 
 from dotenv import load_dotenv
+from services.supabase_client import get_supabase_client as build_supabase_client, is_supabase_enabled
 
 
 load_dotenv()
@@ -28,21 +29,13 @@ def get_secret(name):
 
 
 def get_storage_backend():
-    if get_secret("SUPABASE_URL") and get_secret("SUPABASE_KEY"):
+    if is_supabase_enabled():
         return "supabase"
     return "sqlite"
 
 
 def get_supabase_client():
-    if get_storage_backend() != "supabase":
-        return None
-
-    from supabase import create_client
-
-    return create_client(
-        get_secret("SUPABASE_URL"),
-        get_secret("SUPABASE_KEY"),
-    )
+    return build_supabase_client()
 
 
 def get_connection():
@@ -70,13 +63,17 @@ def init_db():
         )
 
 
-def save_resume(name, project_input, job_description, resume_markdown):
+def save_resume(name, project_input, job_description, resume_markdown, user_id=None):
     if get_storage_backend() == "supabase":
+        if not user_id:
+            raise ValueError("A logged-in user is required to save resumes to Supabase.")
+
         client = get_supabase_client()
         response = (
             client.table("resumes")
             .insert(
                 {
+                    "user_id": user_id,
                     "name": name,
                     "project_input": project_input,
                     "job_description": job_description,
@@ -98,12 +95,16 @@ def save_resume(name, project_input, job_description, resume_markdown):
         return cursor.lastrowid
 
 
-def get_recent_resumes(limit=10):
+def get_recent_resumes(limit=10, user_id=None):
     if get_storage_backend() == "supabase":
+        if not user_id:
+            return []
+
         client = get_supabase_client()
         response = (
             client.table("resumes")
             .select("id, name, project_input, job_description, resume_markdown, created_at")
+            .eq("user_id", user_id)
             .order("created_at", desc=True)
             .limit(limit)
             .execute()
@@ -123,10 +124,13 @@ def get_recent_resumes(limit=10):
     return [dict(row) for row in rows]
 
 
-def delete_resume(resume_id):
+def delete_resume(resume_id, user_id=None):
     if get_storage_backend() == "supabase":
+        if not user_id:
+            raise ValueError("A logged-in user is required to delete resumes from Supabase.")
+
         client = get_supabase_client()
-        client.table("resumes").delete().eq("id", resume_id).execute()
+        client.table("resumes").delete().eq("id", resume_id).eq("user_id", user_id).execute()
         return
 
     with get_connection() as conn:
@@ -139,13 +143,17 @@ def delete_resume(resume_id):
         )
 
 
-def update_resume_markdown(resume_id, resume_markdown):
+def update_resume_markdown(resume_id, resume_markdown, user_id=None):
     if get_storage_backend() == "supabase":
+        if not user_id:
+            raise ValueError("A logged-in user is required to update resumes in Supabase.")
+
         client = get_supabase_client()
         (
             client.table("resumes")
             .update({"resume_markdown": resume_markdown})
             .eq("id", resume_id)
+            .eq("user_id", user_id)
             .execute()
         )
         return
